@@ -1,0 +1,12 @@
+{
+  "name": "scratch-ai-chat-server",
+  "version": "1.0.0",
+  "description": "Scratch AI Chat Server - Claude API bridge",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
