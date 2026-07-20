@@ -1,6 +1,7 @@
 import scratchattach as sa
 import anthropic
 import os
+import time
 
 SCRATCH_USERNAME  = os.environ["SCRATCH_USERNAME"]
 SCRATCH_PASSWORD  = os.environ["SCRATCH_PASSWORD"]
@@ -18,10 +19,11 @@ events = cloud.events()
 
 @events.event
 def on_set(event):
-    print(f"変数変化: {event.name} = {event.value}")
-    if event.name == "☁ input_trigger" and event.value and event.value != "":
-        question = str(event.value)
-        print(f"質問: {question}")
+    print(f"変数変化: {event.name} = {repr(event.value)}")
+    # ☁ input_trigger に値がセットされたとき
+    if "input_trigger" in event.name and event.value and str(event.value).strip():
+        question = str(event.value).strip()
+        print(f"質問受信: {question}")
 
         history.append({"role": "user", "content": question})
 
@@ -34,13 +36,13 @@ def on_set(event):
             )
             reply = resp.content[0].text
             history.append({"role": "assistant", "content": reply})
-            print(f"返答: {reply}")
+            print(f"返答送信: {reply}")
+            # ai_replyに返答をセット（Scratchが監視して表示する）
             cloud.set_var("ai_reply", reply)
-            cloud.set_var("input_trigger", "")
+            # input_triggerは空にしない（Scratchブロックが管理する）
         except Exception as e:
             print(f"APIエラー: {e}")
-            cloud.set_var("ai_reply", "Error occurred")
-            cloud.set_var("input_trigger", "")
+            cloud.set_var("ai_reply", "Error: " + str(e)[:50])
 
 print("イベント監視開始！")
 events.start()
